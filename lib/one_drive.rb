@@ -220,11 +220,25 @@ module OneDrive
         return "OneDrive URL : Item id is not valid"
       end
       p url
-      @items = JSON.parse(HTTParty.get(url,headers: set_headers).body)
-    end
-    def set_headers
-      {"Content-Type"=> 'application/json',"Authorization"=>"bearer #{@token}"}
+      @items = JSON.parse(HTTParty.get(url, headers: set_headers).body)
     end
 
+    def upload_small_text_file(opts = {})
+      return if opts[:content].blank? || opts[:filename]
+      # This endpoint will only accept files under 4MB in size
+      raise StandardError, 'content to large' if opts[:content].bytesize > 4000
+      url = 'https://graph.microsoft.com/v1.0'
+      if opts[:folder_path].present?
+        url += "/me/drive/root:#{opts[:folder_path]}/#{opts[:filename]}:/content"
+      else
+        url += "/me/drive/root:#{opts[:filename]}:/content"
+      end
+      headers = { 'Content-Type': opts[:content_type] || 'text/plain', 'Authorization': "bearer #{@token}" }
+      JSON.parse(HTTParty.put(url, headers: headers, body: opts[:content]).body)
+    end
+
+    def set_headers
+      { 'Content-Type': 'application/json', 'Authorization': "bearer #{@token}" }
+    end
   end
 end
