@@ -233,6 +233,7 @@ module OneDrive
       else
         url += "/me/drive/root:#{opts[:filename]}:/content"
       end
+      # the content type should be the what you want the file to be in one_drive eg: csv, text, ...
       headers = { 'Content-Type': opts[:content_type] || 'text/plain', 'Authorization': "bearer #{@token}" }
       JSON.parse(HTTParty.put(url, headers: headers, body: opts[:content]).body)
     end
